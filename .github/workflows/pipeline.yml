@@ -1,0 +1,60 @@
+name: Node.js CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Servicio de MongoDB para pruebas
+    services:
+      mongodb:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Copiar el código (Checkout)
+      uses: actions/checkout@v3
+
+    - name: Usar Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Correr Tests
+      run: npm test
+      env:
+        # Apuntamos a la DB del servicio de GitHub Actions
+        MONGO_URI: mongodb://localhost:27017/test_db 
+
+  # --- FASE DE CD (DESPLIEGUE) ---
+  # Este job solo se ejecuta si los tests pasan
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Solo desplegar si es la rama main
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Desplegar a Producción (Simulado)
+        run: echo "Aquí irían los comandos de despliegue a AWS, Render, Heroku o DigitalOcean."

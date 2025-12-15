@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./mi-app-cicd/app');
+const app = require('./app');
 const mongoose = require('mongoose');
 
 describe('Pruebas de la API', () => {
