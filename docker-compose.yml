@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos
+  mi-mongo-db:
+    image: mongo:5.0
+    container_name: contenedor_mongo_dev
+    restart: always
+    ports:
+      - "27017:27017" # Mapea el puerto de Docker al de tu PC
+    volumes:
+      - mongo-data:/data/db # Para que los datos no se borren al apagar
+    environment:
+      MONGO_INITDB_DATABASE: mi_base_test
+
+volumes:
+  mongo-data:
